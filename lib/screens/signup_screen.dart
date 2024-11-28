@@ -357,8 +357,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               if (_hasMinLength(value)) strength += 0.25;
                               if (_hasUppercase(value)) strength += 0.25;
                               if (_hasDigits(value)) strength += 0.25;
-                              if (_hasSpecialCharacters(value))
+                              if (_hasSpecialCharacters(value)) {
                                 strength += 0.25;
+                              }
 
                               _passwordStrength = strength;
                             }

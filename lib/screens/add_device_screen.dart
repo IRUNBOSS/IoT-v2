@@ -13,18 +13,20 @@ class AddDeviceScreen extends StatelessWidget {
     String deviceName,
     String deviceId,
   ) async {
+    if (!context.mounted) return;
+
     try {
       final deviceExists =
           await DeviceService().checkIfDeviceTypeExists(deviceType);
 
+      if (!context.mounted) return;
+
       if (deviceExists) {
-        if (context.mounted) {
-          SnackbarService.showSnackbar(
-            context,
-            message: AppLocalizations.of(context)!.deviceAlreadyExists,
-            isError: true,
-          );
-        }
+        SnackbarService.showSnackbar(
+          context,
+          message: AppLocalizations.of(context)!.deviceAlreadyExists,
+          isError: true,
+        );
         return;
       }
 
@@ -35,26 +37,26 @@ class AddDeviceScreen extends StatelessWidget {
         initialStatus: 'online',
       );
 
-      if (context.mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-          (route) => false,
-        );
+      if (!context.mounted) return;
 
-        SnackbarService.showSnackbar(
-          context,
-          message: AppLocalizations.of(context)!.deviceAddedSuccess,
-        );
-      }
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        (route) => false,
+      );
+
+      SnackbarService.showSnackbar(
+        context,
+        message: AppLocalizations.of(context)!.deviceAddedSuccess,
+      );
     } catch (e) {
-      if (context.mounted) {
-        SnackbarService.showSnackbar(
-          context,
-          message: AppLocalizations.of(context)!.errorOccurred(e.toString()),
-          isError: true,
-        );
-      }
+      if (!context.mounted) return;
+
+      SnackbarService.showSnackbar(
+        context,
+        message: AppLocalizations.of(context)!.errorOccurred(e.toString()),
+        isError: true,
+      );
     }
   }
 

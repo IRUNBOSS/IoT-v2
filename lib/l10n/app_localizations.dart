@@ -560,6 +560,42 @@ class AppLocalizations {
     }
   }
 
+  String get databaseError {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Veritabanı hatası: {error}';
+      default:
+        return 'Database error: {error}';
+    }
+  }
+
+  String get deviceOperationError {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Cihaz işlemi sırasında hata: {error}';
+      default:
+        return 'Device operation error: {error}';
+    }
+  }
+
+  String get networkError {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Ağ hatası: {error}';
+      default:
+        return 'Network error: {error}';
+    }
+  }
+
+  String get unknownError {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Bilinmeyen bir hata oluştu: {error}';
+      default:
+        return 'An unknown error occurred: {error}';
+    }
+  }
+
   // Diğer çeviriler için de aynı yapıyı kullan
 }
 

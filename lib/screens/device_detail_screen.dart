@@ -14,108 +14,63 @@ class DeviceDetailScreen extends StatelessWidget {
   });
 
   Future<void> _deleteDevice(BuildContext context) async {
+    if (!context.mounted) return;
+
     try {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
           backgroundColor: Theme.of(context).cardColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Column(
-            children: [
-              Icon(
-                Icons.warning_amber_rounded,
-                size: 40,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                AppLocalizations.of(context)!.delete,
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          content: Text(
-            AppLocalizations.of(context)!.deleteConfirmation,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Theme.of(context).textTheme.bodyMedium?.color,
-            ),
-          ),
+          title: Text(AppLocalizations.of(context)!.delete),
+          content: Text(AppLocalizations.of(context)!.deleteConfirmation),
           actions: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context)!.cancel,
-                      style: const TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          Theme.of(context).colorScheme.errorContainer,
-                      foregroundColor: Theme.of(context).colorScheme.error,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context)!.delete,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(AppLocalizations.of(context)!.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(AppLocalizations.of(context)!.delete),
             ),
           ],
         ),
       );
 
-      if (confirmed == true) {
+      if (confirmed == true && context.mounted) {
         final deviceData = device.data() as Map<String, dynamic>;
         await DeviceService().deleteDevice(deviceData['deviceId']);
 
-        if (context.mounted) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-            (route) => false,
-          );
+        if (!context.mounted) return;
 
-          SnackbarService.showSnackbar(
-            context,
-            message: AppLocalizations.of(context)!.deviceIsDeleted,
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        SnackbarService.showSnackbar(
+        // Snackbar mesajını sakla
+        final message = AppLocalizations.of(context)!.deviceIsDeleted;
+
+        // HomeScreen'e yönlendirme yap
+        if (!context.mounted) return;
+        await Navigator.pushAndRemoveUntil(
           context,
-          message:
-              AppLocalizations.of(context)!.errorDeletingDevice(e.toString()),
-          isError: true,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(
+              showDeleteMessage: true, // Yeni parametre ekle
+              deletedDeviceMessage: message, // Mesajı ilet
+            ),
+          ),
+          (route) => false,
         );
       }
+    } catch (e) {
+      if (!context.mounted) return;
+
+      SnackbarService.showSnackbar(
+        context,
+        message:
+            AppLocalizations.of(context)!.errorDeletingDevice(e.toString()),
+        isError: true,
+      );
     }
   }
 

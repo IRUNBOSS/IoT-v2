@@ -7,6 +7,8 @@ class SnackbarService {
     bool isError = false,
     Duration duration = const Duration(seconds: 3),
   }) {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     final snackBar = SnackBar(
       content: Row(
         children: [
@@ -42,13 +44,11 @@ class SnackbarService {
         label: 'Tamam',
         textColor: Colors.white,
         onPressed: () {
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          scaffoldMessenger.hideCurrentSnackBar();
         },
       ),
     );
 
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(snackBar);
+    scaffoldMessenger.showSnackBar(snackBar);
   }
 }

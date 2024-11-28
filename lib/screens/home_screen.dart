@@ -10,7 +10,14 @@ import 'package:iot/services/snackbar_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final bool showDeleteMessage;
+  final String? deletedDeviceMessage;
+
+  const HomeScreen({
+    super.key,
+    this.showDeleteMessage = false,
+    this.deletedDeviceMessage,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -23,6 +30,16 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _devicesStream = DeviceService().getUserDevices();
+
+    // Cihaz silme mesajını göster
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.showDeleteMessage && widget.deletedDeviceMessage != null) {
+        SnackbarService.showSnackbar(
+          context,
+          message: widget.deletedDeviceMessage!,
+        );
+      }
+    });
   }
 
   @override
@@ -213,25 +230,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     onTap: () async {
-                      Navigator.pop(context);
+                      if (!context.mounted) return;
+
                       try {
                         await Auth().signOut();
-                        if (context.mounted) {
-                          // Tüm sayfaları temizle ve giriş ekranına yönlendir
-                          Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            '/welcome', // Ana giriş/kayıt ekranına yönlendir
-                            (route) => false,
-                          );
-                        }
+                        if (!context.mounted) return;
+
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/welcome',
+                          (route) => false,
+                        );
                       } catch (e) {
-                        if (context.mounted) {
-                          SnackbarService.showSnackbar(
-                            context,
-                            message: 'Çıkış yapılırken bir hata oluştu: $e',
-                            isError: true,
-                          );
-                        }
+                        if (!context.mounted) return;
+
+                        SnackbarService.showSnackbar(
+                          context,
+                          message: AppLocalizations.of(context)!
+                              .errorWhileSigningOut(e.toString()),
+                          isError: true,
+                        );
                       }
                     },
                   ),
@@ -468,34 +486,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: updatedDeviceData['status'] == 'online'
-                          ? Colors.green.withOpacity(
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? 0.2
-                                  : 0.1)
-                          : Colors.red.withOpacity(
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? 0.2
-                                  : 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.circle,
-                            size: 8,
-                            color: updatedDeviceData['status'] == 'online'
-                                ? Colors.green
-                                : Colors.red,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
+                  Expanded(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.circle,
+                          size: 8,
+                          color: updatedDeviceData['status'] == 'online'
+                              ? Colors.green
+                              : Colors.red,
+                        ),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
                             updatedDeviceData['status'] == 'online'
                                 ? AppLocalizations.of(context)!.online
                                 : AppLocalizations.of(context)!.offline,
@@ -507,32 +511,31 @@ class _HomeScreenState extends State<HomeScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          const SizedBox(width: 4),
-                          Switch(
-                            value: updatedDeviceData['status'] == 'online',
-                            onChanged: (bool value) async {
-                              try {
-                                await DeviceService().updateDeviceStatus(
-                                  deviceData['deviceId'],
-                                  value ? 'online' : 'offline',
+                        ),
+                        Switch(
+                          value: updatedDeviceData['status'] == 'online',
+                          onChanged: (bool value) async {
+                            try {
+                              await DeviceService().updateDeviceStatus(
+                                deviceData['deviceId'],
+                                value ? 'online' : 'offline',
+                              );
+                            } catch (e) {
+                              if (context.mounted) {
+                                SnackbarService.showSnackbar(
+                                  context,
+                                  message: 'Hata: $e',
+                                  isError: true,
                                 );
-                              } catch (e) {
-                                if (context.mounted) {
-                                  SnackbarService.showSnackbar(
-                                    context,
-                                    message: 'Hata: $e',
-                                    isError: true,
-                                  );
-                                }
                               }
-                            },
-                            activeColor: Colors.green,
-                            inactiveThumbColor: Colors.red,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                          ),
-                        ],
-                      ),
+                            }
+                          },
+                          activeColor: Colors.green,
+                          inactiveThumbColor: Colors.red,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      ],
                     ),
                   ),
                 ],

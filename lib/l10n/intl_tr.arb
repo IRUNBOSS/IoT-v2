@@ -99,5 +99,9 @@
     "dispenseWater": "Su Boşalt",
     "dispenseWaterNow": "{amount} ml Su Ver",
     "perMeal": "Her öğün için",
-    "perWatering": "Her sulama için"
+    "perWatering": "Her sulama için",
+    "databaseError": "Veritabanı hatası: {error}",
+    "deviceOperationError": "Cihaz işlemi sırasında hata: {error}",
+    "networkError": "Ağ hatası: {error}",
+    "unknownError": "Bilinmeyen bir hata oluştu: {error}"
 } 
