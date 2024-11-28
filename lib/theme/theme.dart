@@ -29,6 +29,30 @@ class AppTheme {
     iconTheme: const IconThemeData(
       color: Colors.blue,
     ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.blue;
+        }
+        return Colors.grey;
+      }),
+      trackColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.blue.withOpacity(0.5);
+        }
+        return Colors.grey.withOpacity(0.5);
+      }),
+    ),
   );
 
   static final ThemeData darkTheme = ThemeData(
@@ -60,6 +84,30 @@ class AppTheme {
     ),
     iconTheme: const IconThemeData(
       color: Colors.blue,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.blue;
+        }
+        return Colors.grey;
+      }),
+      trackColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.blue.withOpacity(0.5);
+        }
+        return Colors.grey.withOpacity(0.5);
+      }),
     ),
     dialogTheme: const DialogTheme(
       backgroundColor: Color(0xFF1E1E1E),

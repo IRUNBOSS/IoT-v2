@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iot/services/database_service.dart';
+import 'package:logging/logging.dart';
 
 class DeviceService {
   final DatabaseService _db = DatabaseService();
+  final _logger = Logger('DeviceService');
 
   // Stream önbelleğe alma için
   final Map<String, Stream<DocumentSnapshot>> _deviceStreams = {};
@@ -12,34 +14,42 @@ class DeviceService {
     required String deviceName,
     required String deviceId,
     required String initialStatus,
+    Map<String, dynamic>? customSettings,
   }) async {
-    Map<String, dynamic> defaultSettings = {};
+    try {
+      Map<String, dynamic> defaultSettings = {};
 
-    if (deviceType == 'food_bowl') {
-      defaultSettings = {
-        'foodBowlSettings': {
-          'foodLevel': 2000,
-          'maxCapacity': 2000,
-          'portionSize': 100,
-        }
-      };
-    } else if (deviceType == 'water_bowl') {
-      defaultSettings = {
-        'waterBowlSettings': {
-          'waterLevel': 2000,
-          'maxCapacity': 2000,
-          'portionSize': 100,
-        }
-      };
+      if (deviceType == 'food_bowl') {
+        defaultSettings = {
+          'foodBowlSettings': {
+            'foodLevel': 2000,
+            'maxCapacity': 2000,
+            'portionSize': 100,
+          }
+        };
+      } else if (deviceType == 'water_bowl') {
+        defaultSettings = {
+          'waterBowlSettings': {
+            'waterLevel': 2000,
+            'maxCapacity': 2000,
+            'portionSize': 100,
+          }
+        };
+      } else if (customSettings != null) {
+        defaultSettings = {'customSettings': customSettings};
+      }
+
+      await _db.addDevice(
+        deviceType: deviceType,
+        deviceName: deviceName,
+        deviceId: deviceId,
+        initialStatus: initialStatus,
+        defaultSettings: defaultSettings,
+      );
+    } catch (e) {
+      _logger.severe('DeviceService addNewDevice hatası: $e');
+      rethrow;
     }
-
-    await _db.addDevice(
-      deviceType: deviceType,
-      deviceName: deviceName,
-      deviceId: deviceId,
-      initialStatus: initialStatus,
-      defaultSettings: defaultSettings,
-    );
   }
 
   Stream<QuerySnapshot> getUserDevices() {

@@ -519,57 +519,125 @@ class DeviceDetailScreen extends StatelessWidget {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.editLocation),
-        content: TextField(
-          controller: locationController,
-          decoration: InputDecoration(
-            labelText: AppLocalizations.of(context)!.location,
-            hintText: AppLocalizations.of(context)!.locationHint,
-          ),
+        backgroundColor: Theme.of(context).cardColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-          TextButton(
-            onPressed: () async {
-              final newLocation = locationController.text.trim();
-              if (newLocation.isNotEmpty) {
-                try {
-                  await DeviceService().updateDeviceLocation(
-                    deviceId: deviceId,
-                    location: newLocation,
-                  );
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                    SnackbarService.showSnackbar(
-                      context,
-                      message:
-                          AppLocalizations.of(context)!.deviceLocationUpdated,
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    SnackbarService.showSnackbar(
-                      context,
-                      message: AppLocalizations.of(context)!
-                          .errorUpdatingSettings(e.toString()),
-                      isError: true,
-                    );
-                  }
-                }
-              }
-            },
-            child: Text(
-              AppLocalizations.of(context)!.save,
+        title: Column(
+          children: [
+            Icon(
+              Icons.location_on,
+              size: 40,
+              color: Colors.blue,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              AppLocalizations.of(context)!.editLocation,
               style: TextStyle(
-                color: Colors.blue,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
                 fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: locationController,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey[800]
+                    : Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                prefixIcon: const Icon(Icons.location_on),
+                labelText: AppLocalizations.of(context)!.location,
+                hintText: AppLocalizations.of(context)!.locationHint,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.blue, width: 2),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).dividerColor,
+                  ),
+                ),
+                floatingLabelStyle: const TextStyle(color: Colors.blue),
+                isDense: true,
+              ),
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+              cursorColor: Colors.blue,
+              onTapOutside: (event) => FocusScope.of(context).unfocus(),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    AppLocalizations.of(context)!.cancel,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () async {
+                    final newLocation = locationController.text.trim();
+                    if (newLocation.isNotEmpty) {
+                      try {
+                        await DeviceService().updateDeviceLocation(
+                          deviceId: deviceId,
+                          location: newLocation,
+                        );
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          SnackbarService.showSnackbar(
+                            context,
+                            message: AppLocalizations.of(context)!
+                                .deviceLocationUpdated,
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          SnackbarService.showSnackbar(
+                            context,
+                            message: AppLocalizations.of(context)!
+                                .errorUpdatingSettings(e.toString()),
+                            isError: true,
+                          );
+                        }
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context)!.save,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -744,8 +812,19 @@ class DeviceDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final deviceData = device.data() as Map<String, dynamic>;
 
+    Widget content;
+    switch (deviceData['deviceType']) {
+      case 'food_bowl':
+        content = _buildFoodBowlContent(deviceData, context);
+        break;
+      case 'water_bowl':
+        content = _buildWaterBowlContent(deviceData, context);
+        break;
+      default:
+        content = _buildCustomDeviceContent(deviceData, context);
+    }
+
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).cardColor,
         title: Text(
@@ -772,33 +851,7 @@ class DeviceDetailScreen extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            if (deviceData['status'] == 'online')
-              Expanded(
-                child: SingleChildScrollView(
-                  child: deviceData['deviceType'] == 'food_bowl'
-                      ? _buildFoodBowlContent(deviceData, context)
-                      : _buildWaterBowlContent(deviceData, context),
-                ),
-              )
-            else
-              Expanded(
-                child: Center(
-                  child: Text(
-                    'Cihaz çevrimdışı',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
+      body: content,
     );
   }
 
@@ -1228,6 +1281,110 @@ class DeviceDetailScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCustomDeviceContent(
+      Map<String, dynamic> deviceData, BuildContext context) {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: DeviceService().getDeviceStream(deviceData['deviceId']),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final updatedDeviceData =
+            snapshot.data!.data() as Map<String, dynamic>?;
+        if (updatedDeviceData == null) {
+          return const Center(child: Text('Cihaz verisi bulunamadı'));
+        }
+
+        final Map<String, dynamic> customSettings =
+            updatedDeviceData['customSettings'] as Map<String, dynamic>? ?? {};
+
+        return ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            // Cihaz Durumu Kartı
+            _buildDeviceCard(
+              context,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle(
+                      context, AppLocalizations.of(context)!.deviceStatus),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        updatedDeviceData['status'] == 'online'
+                            ? AppLocalizations.of(context)!.online
+                            : AppLocalizations.of(context)!.offline,
+                        style: TextStyle(
+                          color: updatedDeviceData['status'] == 'online'
+                              ? Colors.green
+                              : Colors.red,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Switch(
+                        value: updatedDeviceData['status'] == 'online',
+                        onChanged: (value) async {
+                          await DeviceService().updateDeviceStatus(
+                            deviceData['deviceId'],
+                            value ? 'online' : 'offline',
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Sensör Değerleri Kartı
+            _buildDeviceCard(
+              context,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle(context,
+                      AppLocalizations.of(context)!.customDeviceProperties),
+                  const SizedBox(height: 16),
+                  ...customSettings.entries.map((entry) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            entry.key,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            entry.value['value'].toString(),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

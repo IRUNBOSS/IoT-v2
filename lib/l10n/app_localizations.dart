@@ -596,6 +596,96 @@ class AppLocalizations {
     }
   }
 
+  String get customDeviceProperties {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Cihaz Özellikleri';
+      default:
+        return 'Device Properties';
+    }
+  }
+
+  String get addProperty {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Özellik Ekle';
+      default:
+        return 'Add Property';
+    }
+  }
+
+  String get propertyName {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Özellik Adı';
+      default:
+        return 'Property Name';
+    }
+  }
+
+  String get propertyType {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Özellik Tipi';
+      default:
+        return 'Property Type';
+    }
+  }
+
+  String get propertyDefaultValue {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Varsayılan Değer';
+      default:
+        return 'Default Value';
+    }
+  }
+
+  String get fieldRequired {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Bu alan zorunludur';
+      default:
+        return 'This field is required';
+    }
+  }
+
+  String get invalidNumber {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Geçerli bir sayı giriniz';
+      default:
+        return 'Please enter a valid number';
+    }
+  }
+
+  String get numberType {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Sayı';
+      default:
+        return 'Number';
+    }
+  }
+
+  String get booleanType {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Açık/Kapalı';
+      default:
+        return 'On/Off';
+    }
+  }
+
+  String get textType {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Metin';
+      default:
+        return 'Text';
+    }
+  }
+
   // Diğer çeviriler için de aynı yapıyı kullan
 }
 
