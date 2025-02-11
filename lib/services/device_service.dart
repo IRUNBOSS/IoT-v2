@@ -58,6 +58,10 @@ class DeviceService {
           'updateInterval': 5,
           'deviceLocation': 'Ev',
         },
+        'lightSettings': {
+          'isLightOpen': false,
+          'lightDuration': 30,
+        },
       });
 
       _logger.info('Cihaz başarıyla eklendi: $deviceId');
@@ -190,6 +194,26 @@ class DeviceService {
       });
     } catch (e) {
       throw Exception('Cihaz konumu güncellenirken bir hata oluştu: $e');
+    }
+  }
+
+  Future<void> updateLightSettings({
+    required String deviceId,
+    required bool isLightOpen,
+    required int lightDuration,
+  }) async {
+    if (userId == null) throw Exception('Kullanıcı oturum açmamış');
+
+    try {
+      await _firestore.collection('devices').doc(deviceId).update({
+        'lightSettings': {
+          'isLightOpen': isLightOpen,
+          'lightDuration': lightDuration,
+        },
+        'lastUpdated': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Işık ayarları güncellenirken bir hata oluştu: $e');
     }
   }
 }

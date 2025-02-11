@@ -4,6 +4,7 @@ import 'package:iot/services/device_service.dart';
 import 'package:iot/screens/home_screen.dart';
 import 'package:iot/services/snackbar_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'dart:async';
 
 class DeviceDetailScreen extends StatelessWidget {
   final DocumentSnapshot device;
@@ -245,6 +246,11 @@ class DeviceDetailScreen extends StatelessWidget {
 
             // Cihaz Durumu Kartı
             _buildDeviceStatusCard(context, updatedDeviceData),
+
+            // Işık Kontrolü Kartı
+            const SizedBox(height: 10),
+            _buildLightControlCard(
+                context, updatedDeviceData, deviceData['deviceId']),
           ],
         );
       },
@@ -380,6 +386,11 @@ class DeviceDetailScreen extends StatelessWidget {
 
             // Cihaz Durumu Kartı
             _buildDeviceStatusCard(context, updatedDeviceData),
+
+            // Işık Kontrolü Kartı
+            const SizedBox(height: 10),
+            _buildLightControlCard(
+                context, updatedDeviceData, deviceData['deviceId']),
           ],
         );
       },
@@ -1272,6 +1283,265 @@ class DeviceDetailScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildLightControlCard(
+    BuildContext context,
+    Map<String, dynamic> deviceData,
+    String deviceId,
+  ) {
+    final Map<String, dynamic> lightSettings =
+        deviceData['lightSettings'] as Map<String, dynamic>? ??
+            {'isLightOpen': false, 'lightDuration': 30};
+
+    final TextEditingController durationController = TextEditingController(
+      text: lightSettings['lightDuration'].toString(),
+    );
+
+    return Card(
+      elevation: 2,
+      color: Theme.of(context).cardColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Işık Kontrolü',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                ),
+                Switch(
+                  value: lightSettings['isLightOpen'] ?? false,
+                  onChanged: (bool value) async {
+                    try {
+                      await DeviceService().updateLightSettings(
+                        deviceId: deviceId,
+                        isLightOpen: value,
+                        lightDuration: lightSettings['lightDuration'],
+                      );
+                    } catch (e) {
+                      if (context.mounted) {
+                        SnackbarService.showSnackbar(
+                          context,
+                          message:
+                              'Işık kontrolü güncellenirken hata oluştu: $e',
+                          isError: true,
+                        );
+                      }
+                    }
+                  },
+                  activeColor: Colors.blue,
+                  activeTrackColor: Colors.blue.withOpacity(0.4),
+                  inactiveThumbColor: Colors.grey[400],
+                  inactiveTrackColor: Colors.grey[300],
+                  materialTapTargetSize: MaterialTapTargetSize.padded,
+                  trackOutlineColor: WidgetStateProperty.resolveWith(
+                    (states) => Colors.grey[400],
+                  ),
+                  trackOutlineWidth: WidgetStateProperty.all(1.0),
+                  splashRadius: 24,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.blue.withOpacity(0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.lightbulb,
+                      color: Colors.blue,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: durationController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Işık Süresi (saniye)',
+                        labelStyle: TextStyle(
+                          color: Colors.blue,
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: Colors.blue),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: Colors.blue, width: 2),
+                        ),
+                      ),
+                      onChanged: (value) async {
+                        if (value.isNotEmpty) {
+                          try {
+                            final duration = int.parse(value);
+                            if (duration > 0) {
+                              await DeviceService().updateLightSettings(
+                                deviceId: deviceId,
+                                isLightOpen: lightSettings['isLightOpen'],
+                                lightDuration: duration,
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              SnackbarService.showSnackbar(
+                                context,
+                                message: 'Süre güncellenirken hata oluştu: $e',
+                                isError: true,
+                              );
+                            }
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (lightSettings['isLightOpen'] ?? false)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: CountdownTimer(
+                  duration: lightSettings['lightDuration'],
+                  onFinished: () async {
+                    try {
+                      await DeviceService().updateLightSettings(
+                        deviceId: deviceId,
+                        isLightOpen: false,
+                        lightDuration: lightSettings['lightDuration'],
+                      );
+                      if (context.mounted) {
+                        SnackbarService.showSnackbar(
+                          context,
+                          message: 'Işık otomatik olarak kapatıldı',
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        SnackbarService.showSnackbar(
+                          context,
+                          message: 'Işık kapatılırken hata oluştu: $e',
+                          isError: true,
+                        );
+                      }
+                    }
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CountdownTimer extends StatefulWidget {
+  final int duration;
+  final VoidCallback onFinished;
+
+  const CountdownTimer({
+    super.key,
+    required this.duration,
+    required this.onFinished,
+  });
+
+  @override
+  State<CountdownTimer> createState() => _CountdownTimerState();
+}
+
+class _CountdownTimerState extends State<CountdownTimer> {
+  late Timer _timer;
+  late int _remainingSeconds;
+
+  @override
+  void initState() {
+    super.initState();
+    _remainingSeconds = widget.duration;
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        _timer.cancel();
+        return;
+      }
+      setState(() {
+        if (_remainingSeconds > 0) {
+          _remainingSeconds--;
+        } else {
+          _timer.cancel();
+          widget.onFinished();
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.timer,
+            size: 16,
+            color: Colors.blue,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            'Kalan süre: $_remainingSeconds saniye',
+            style: const TextStyle(
+              color: Colors.blue,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }

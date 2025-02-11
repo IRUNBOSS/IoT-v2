@@ -272,7 +272,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                       TextFormField(
                         controller: emailController,
-                        validator: (value) => FormValidators.email(value),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            setState(() {});
+                            return '';
+                          }
+                          return null;
+                        },
                         decoration: InputDecoration(
                           hintText: AppLocalizations.of(context)!.email,
                           prefixIcon: const Icon(Icons.email_outlined),
@@ -357,8 +363,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               if (_hasMinLength(value)) strength += 0.25;
                               if (_hasUppercase(value)) strength += 0.25;
                               if (_hasDigits(value)) strength += 0.25;
-                              if (_hasSpecialCharacters(value))
+                              if (_hasSpecialCharacters(value)) {
                                 strength += 0.25;
+                              }
 
                               _passwordStrength = strength;
                             }
