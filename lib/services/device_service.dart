@@ -12,6 +12,7 @@ class DeviceService {
     required String deviceName,
     required String deviceId,
     required String initialStatus,
+    String? deviceCode,
   }) async {
     if (userId == null) throw Exception('Kullanıcı oturum açmamış');
 
@@ -21,48 +22,75 @@ class DeviceService {
       _logger.info('Kullanıcı ID: $userId');
       _logger.info('Cihaz Tipi: $deviceType');
       _logger.info('Cihaz ID: $deviceId');
+      _logger.info('Cihaz Kodu: $deviceCode');
 
-      Map<String, dynamic> defaultSettings = {};
+      // Cihaz türüne göre özel ayarlar
+      Map<String, dynamic> deviceSettings = {};
 
       if (deviceType == 'food_bowl') {
-        defaultSettings = {
+        // Mama kabı için özel ayarlar
+        deviceSettings = {
           'foodBowlSettings': {
             'foodLevel': 2000,
             'maxCapacity': 2000,
             'portionSize': 100,
+            'feedingSchedule': [],
+            'lastFeeding': null,
+            'autoFeedingEnabled': false,
           }
         };
       } else if (deviceType == 'water_bowl') {
-        defaultSettings = {
+        // Su kabı için özel ayarlar
+        deviceSettings = {
           'waterBowlSettings': {
             'waterLevel': 2000,
+            'maxCapacity': 2000,
+            'portionSize': 100,
+            'cleaningSchedule': [],
+            'lastCleaning': null,
+            'autoCleaningEnabled': false,
+          }
+        };
+      } else {
+        // Diğer cihaz türleri için genel ayarlar
+        deviceSettings = {
+          'settings': {
+            'level': 2000,
             'maxCapacity': 2000,
             'portionSize': 100,
           }
         };
       }
 
-      await collectionRef.doc(deviceId).set({
+      // Cihaz verilerini oluştur
+      Map<String, dynamic> deviceData = {
         'userId': userId,
         'deviceType': deviceType,
         'deviceName': deviceName,
         'deviceId': deviceId,
+        'deviceCode': deviceCode,
         'status': initialStatus,
         'lastUpdated': FieldValue.serverTimestamp(),
         'createdAt': FieldValue.serverTimestamp(),
         'isActive': true,
         'batteryLevel': 100,
-        ...defaultSettings,
+        ...deviceSettings,
         'generalSettings': {
           'isNotificationEnabled': true,
           'updateInterval': 5,
           'deviceLocation': 'Ev',
         },
-        'lightSettings': {
+      };
+
+      // Cihaz türüne göre ek ayarlar
+      if (deviceType == 'food_bowl' || deviceType == 'water_bowl') {
+        deviceData['lightSettings'] = {
           'isLightOpen': false,
           'lightDuration': 30,
-        },
-      });
+        };
+      }
+
+      await collectionRef.doc(deviceId).set(deviceData);
 
       _logger.info('Cihaz başarıyla eklendi: $deviceId');
     } catch (e) {
@@ -168,13 +196,8 @@ class DeviceService {
     if (userId == null) throw Exception('Kullanıcı oturum açmamış');
 
     try {
-      final querySnapshot = await _firestore
-          .collection('devices')
-          .where('userId', isEqualTo: userId)
-          .where('deviceType', isEqualTo: deviceType)
-          .get();
-
-      return querySnapshot.docs.isNotEmpty;
+      // Artık kullanıcı aynı türde birden fazla cihaz ekleyebilir
+      return false;
     } catch (e) {
       _logger.severe('Cihaz kontrolü sırasında hata: $e');
       throw Exception('Cihaz kontrolü sırasında bir hata oluştu');

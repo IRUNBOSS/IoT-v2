@@ -99,5 +99,18 @@
     "dispenseWater": "Dispense Water",
     "dispenseWaterNow": "Dispense {amount} ml",
     "perMeal": "Per meal",
-    "perWatering": "Per watering"
+    "perWatering": "Per watering",
+    
+    "enterDeviceCode": "Enter Device Code",
+    "deviceCodeHint": "Ex: MS123, M123, S123",
+    "deviceCodeRequired": "Please enter device code",
+    "deviceCodeInfo": "Codes starting with M will be added as Food Bowl,\nCodes starting with S will be added as Water Bowl,\nCodes starting with MS will be added as both Food and Water Bowl.",
+    "addDeviceButton": "Add Device",
+    
+    "deviceCodeFormat": "Device code format: Letter(s) + up to 4 digits",
+    "deviceCodeInvalidFormat": "Invalid format. Please enter letter(s) followed by up to 4 digits",
+    "deviceCodeMaxDigits": "You can enter up to 4 digits",
+    
+    "logout": "Logout",
+    "language": "Language"
 }

@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:iot/providers/theme_provider.dart';
 import 'package:iot/services/snackbar_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:iot/providers/locale_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -46,194 +47,275 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           StatefulBuilder(
             builder: (context, setState) => PopupMenuButton(
-              icon: const Icon(
-                Icons.settings,
-                color: Colors.blue,
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.blue.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.settings,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.blue,
+                  size: 24,
+                ),
               ),
-              color: Theme.of(context).cardColor,
-              elevation: 4,
+              offset: const Offset(0, 10),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF1E1E1E)
+                  : Colors.white,
+              elevation: 10,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
                   color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white24
+                      ? Colors.white.withOpacity(0.1)
                       : Colors.grey.shade200,
                   width: 1,
                 ),
               ),
+              constraints: const BoxConstraints(
+                minWidth: 300,
+                maxWidth: 340,
+              ),
               itemBuilder: (context) => [
                 PopupMenuItem(
+                  padding: EdgeInsets.zero,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(8),
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF1E1E1E)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Consumer<ThemeProvider>(
                       builder: (context, themeProvider, child) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ListTile(
-                            leading: const Icon(Icons.brightness_auto,
-                                color: Colors.blue),
-                            title: Text(
-                              AppLocalizations.of(context)!.systemTheme,
-                              style: TextStyle(
-                                color: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black87,
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 16),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.black.withOpacity(0.3)
+                                  : Colors.blue.withOpacity(0.08),
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
                               ),
                             ),
-                            trailing: Theme(
-                              data: ThemeData(
-                                unselectedWidgetColor: Colors.grey.shade400,
-                                radioTheme: RadioThemeData(
-                                  fillColor:
-                                      WidgetStateProperty.resolveWith<Color>(
-                                    (Set<WidgetState> states) {
-                                      if (states
-                                          .contains(WidgetState.selected)) {
-                                        return Colors.blue;
-                                      }
-                                      return Colors.grey.shade400;
-                                    },
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.palette_outlined,
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white
+                                      : Colors.blue,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Tema / Theme',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white
+                                        : Colors.blue,
                                   ),
                                 ),
-                              ),
-                              child: Radio<ThemeMode>(
-                                value: ThemeMode.system,
-                                groupValue: themeProvider.themeMode,
-                                onChanged: (ThemeMode? value) {
-                                  if (value != null) {
-                                    Provider.of<ThemeProvider>(context,
-                                            listen: false)
-                                        .setThemeMode(value);
-                                  }
-                                },
-                              ),
+                              ],
                             ),
                           ),
-                          ListTile(
-                            leading: const Icon(Icons.light_mode,
-                                color: Colors.blue),
-                            title: Text(
-                              AppLocalizations.of(context)!.lightTheme,
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge
-                                    ?.color,
-                              ),
-                            ),
-                            trailing: Theme(
-                              data: ThemeData(
-                                unselectedWidgetColor: Colors.grey.shade400,
-                                radioTheme: RadioThemeData(
-                                  fillColor:
-                                      WidgetStateProperty.resolveWith<Color>(
-                                    (Set<WidgetState> states) {
-                                      if (states
-                                          .contains(WidgetState.selected)) {
-                                        return Colors.blue;
-                                      }
-                                      return Colors.grey.shade400;
-                                    },
-                                  ),
-                                ),
-                              ),
-                              child: Radio<ThemeMode>(
-                                value: ThemeMode.light,
-                                groupValue: themeProvider.themeMode,
-                                onChanged: (ThemeMode? value) {
-                                  if (value != null) {
-                                    Provider.of<ThemeProvider>(context,
-                                            listen: false)
-                                        .setThemeMode(value);
-                                  }
-                                },
-                              ),
-                            ),
+                          const SizedBox(height: 8),
+                          _buildThemeOption(
+                            context,
+                            themeProvider,
+                            ThemeMode.system,
+                            Icons.brightness_auto,
+                            AppLocalizations.of(context)!.systemTheme,
                           ),
-                          ListTile(
-                            leading:
-                                const Icon(Icons.dark_mode, color: Colors.blue),
-                            title: Text(
-                              AppLocalizations.of(context)!.darkTheme,
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge
-                                    ?.color,
-                              ),
-                            ),
-                            trailing: Theme(
-                              data: ThemeData(
-                                unselectedWidgetColor: Colors.grey.shade400,
-                                radioTheme: RadioThemeData(
-                                  fillColor:
-                                      WidgetStateProperty.resolveWith<Color>(
-                                    (Set<WidgetState> states) {
-                                      if (states
-                                          .contains(WidgetState.selected)) {
-                                        return Colors.blue;
-                                      }
-                                      return Colors.grey.shade400;
-                                    },
-                                  ),
-                                ),
-                              ),
-                              child: Radio<ThemeMode>(
-                                value: ThemeMode.dark,
-                                groupValue: themeProvider.themeMode,
-                                onChanged: (ThemeMode? value) {
-                                  if (value != null) {
-                                    Provider.of<ThemeProvider>(context,
-                                            listen: false)
-                                        .setThemeMode(value);
-                                  }
-                                },
-                              ),
-                            ),
+                          _buildThemeOption(
+                            context,
+                            themeProvider,
+                            ThemeMode.light,
+                            Icons.light_mode,
+                            AppLocalizations.of(context)!.lightTheme,
                           ),
+                          _buildThemeOption(
+                            context,
+                            themeProvider,
+                            ThemeMode.dark,
+                            Icons.dark_mode,
+                            AppLocalizations.of(context)!.darkTheme,
+                          ),
+                          const SizedBox(height: 8),
                         ],
                       ),
                     ),
                   ),
                 ),
-                const PopupMenuItem(child: Divider()),
                 PopupMenuItem(
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.logout,
-                      color: Theme.of(context).colorScheme.error,
+                  padding: EdgeInsets.zero,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    height: 1,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.grey.shade200,
+                  ),
+                ),
+                PopupMenuItem(
+                  padding: EdgeInsets.zero,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF1E1E1E)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    title: Text(
-                      'Çıkış Yap',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
+                    child: Consumer<LocaleProvider>(
+                      builder: (context, localeProvider, child) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 16),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.black.withOpacity(0.3)
+                                  : Colors.blue.withOpacity(0.08),
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.language_outlined,
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white
+                                      : Colors.blue,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Dil / Language',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white
+                                        : Colors.blue,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          _buildLanguageOption(
+                            context,
+                            localeProvider,
+                            const Locale('tr'),
+                            'Türkçe',
+                          ),
+                          _buildLanguageOption(
+                            context,
+                            localeProvider,
+                            const Locale('en'),
+                            'English',
+                          ),
+                          const SizedBox(height: 8),
+                        ],
                       ),
                     ),
-                    onTap: () async {
-                      Navigator.pop(context);
-                      try {
-                        await Auth().signOut();
-                        if (context.mounted) {
-                          // Tüm sayfaları temizle ve giriş ekranına yönlendir
-                          Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            '/welcome', // Ana giriş/kayıt ekranına yönlendir
-                            (route) => false,
-                          );
+                  ),
+                ),
+                PopupMenuItem(
+                  padding: EdgeInsets.zero,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    height: 1,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.grey.shade200,
+                  ),
+                ),
+                PopupMenuItem(
+                  padding: EdgeInsets.zero,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF1E1E1E)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 8),
+                      leading: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .error
+                                  .withOpacity(0.1)
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .error
+                                  .withOpacity(0.08),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.logout_rounded,
+                          color: Theme.of(context).colorScheme.error,
+                          size: 22,
+                        ),
+                      ),
+                      title: Text(
+                        'Çıkış Yap',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      onTap: () async {
+                        Navigator.pop(context);
+                        try {
+                          await Auth().signOut();
+                          if (context.mounted) {
+                            // Tüm sayfaları temizle ve giriş ekranına yönlendir
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              '/welcome', // Ana giriş/kayıt ekranına yönlendir
+                              (route) => false,
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            SnackbarService.showSnackbar(
+                              context,
+                              message: 'Çıkış yapılırken bir hata oluştu: $e',
+                              isError: true,
+                            );
+                          }
                         }
-                      } catch (e) {
-                        if (context.mounted) {
-                          SnackbarService.showSnackbar(
-                            context,
-                            message: 'Çıkış yapılırken bir hata oluştu: $e',
-                            isError: true,
-                          );
-                        }
-                      }
-                    },
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -340,6 +422,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisCount: 2,
                             crossAxisSpacing: 15,
                             mainAxisSpacing: 15,
+                            childAspectRatio: 0.85,
                           ),
                           itemCount: snapshot.data!.docs.length,
                           itemBuilder: (context, index) {
@@ -447,10 +530,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               );
             },
+            borderRadius: BorderRadius.circular(15),
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Icon(
                     getDeviceIcon(),
@@ -466,9 +551,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                     textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
                   Container(
+                    width: double.infinity,
                     decoration: BoxDecoration(
                       color: updatedDeviceData['status'] == 'online'
                           ? Colors.green.withOpacity(
@@ -483,53 +571,63 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                          horizontal: 4, vertical: 2),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Icon(
-                            Icons.circle,
-                            size: 8,
-                            color: updatedDeviceData['status'] == 'online'
-                                ? Colors.green
-                                : Colors.red,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.circle,
+                                size: 8,
+                                color: updatedDeviceData['status'] == 'online'
+                                    ? Colors.green
+                                    : Colors.red,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                updatedDeviceData['status'] == 'online'
+                                    ? AppLocalizations.of(context)!.online
+                                    : AppLocalizations.of(context)!.offline,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: updatedDeviceData['status'] == 'online'
+                                      ? Colors.green
+                                      : Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            updatedDeviceData['status'] == 'online'
-                                ? AppLocalizations.of(context)!.online
-                                : AppLocalizations.of(context)!.offline,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: updatedDeviceData['status'] == 'online'
-                                  ? Colors.green
-                                  : Colors.red,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Switch(
-                            value: updatedDeviceData['status'] == 'online',
-                            onChanged: (bool value) async {
-                              try {
-                                await DeviceService().updateDeviceStatus(
-                                  deviceData['deviceId'],
-                                  value ? 'online' : 'offline',
-                                );
-                              } catch (e) {
-                                if (context.mounted) {
-                                  SnackbarService.showSnackbar(
-                                    context,
-                                    message: 'Hata: $e',
-                                    isError: true,
+                          Transform.scale(
+                            scale: 0.6,
+                            child: Switch(
+                              value: updatedDeviceData['status'] == 'online',
+                              onChanged: (bool value) async {
+                                try {
+                                  await DeviceService().updateDeviceStatus(
+                                    deviceData['deviceId'],
+                                    value ? 'online' : 'offline',
                                   );
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    SnackbarService.showSnackbar(
+                                      context,
+                                      message: 'Hata: $e',
+                                      isError: true,
+                                    );
+                                  }
                                 }
-                              }
-                            },
-                            activeColor: Colors.green,
-                            inactiveThumbColor: Colors.red,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
+                              },
+                              activeColor: Colors.green,
+                              inactiveThumbColor: Colors.red,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                            ),
                           ),
                         ],
                       ),
@@ -541,6 +639,160 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildThemeOption(
+    BuildContext context,
+    ThemeProvider themeProvider,
+    ThemeMode mode,
+    IconData icon,
+    String title,
+  ) {
+    final isSelected = themeProvider.themeMode == mode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return InkWell(
+      onTap: () {
+        Provider.of<ThemeProvider>(context, listen: false).setThemeMode(mode);
+        Navigator.pop(context);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        margin: const EdgeInsets.symmetric(vertical: 2),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark
+                  ? Colors.white.withOpacity(0.05)
+                  : Colors.blue.withOpacity(0.08))
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? (isDark
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.blue.withOpacity(0.15))
+                    : isDark
+                        ? Colors.white.withOpacity(0.05)
+                        : Colors.grey.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: isSelected
+                    ? (isDark ? Colors.white : Colors.blue.shade700)
+                    : isDark
+                        ? Colors.white.withOpacity(0.7)
+                        : Colors.grey.shade700,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected
+                      ? (isDark ? Colors.white : Colors.blue.shade700)
+                      : isDark
+                          ? Colors.white.withOpacity(0.7)
+                          : Colors.grey.shade800,
+                ),
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle,
+                color: isDark ? Colors.white : Colors.blue.shade700,
+                size: 20,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption(
+    BuildContext context,
+    LocaleProvider localeProvider,
+    Locale locale,
+    String title,
+  ) {
+    final isSelected =
+        localeProvider.locale.languageCode == locale.languageCode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return InkWell(
+      onTap: () {
+        Provider.of<LocaleProvider>(context, listen: false).setLocale(locale);
+        Navigator.pop(context);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        margin: const EdgeInsets.symmetric(vertical: 2),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark
+                  ? Colors.white.withOpacity(0.05)
+                  : Colors.blue.withOpacity(0.08))
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? (isDark
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.blue.withOpacity(0.15))
+                    : isDark
+                        ? Colors.white.withOpacity(0.05)
+                        : Colors.grey.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.language,
+                color: isSelected
+                    ? (isDark ? Colors.white : Colors.blue.shade700)
+                    : isDark
+                        ? Colors.white.withOpacity(0.7)
+                        : Colors.grey.shade700,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected
+                      ? (isDark ? Colors.white : Colors.blue.shade700)
+                      : isDark
+                          ? Colors.white.withOpacity(0.7)
+                          : Colors.grey.shade800,
+                ),
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle,
+                color: isDark ? Colors.white : Colors.blue.shade700,
+                size: 20,
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
