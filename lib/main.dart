@@ -6,6 +6,7 @@ import 'package:iot/widgets/auth_wrapper.dart';
 import 'package:iot/theme/theme.dart';
 import 'package:iot/providers/theme_provider.dart';
 import 'package:iot/screens/welcome_screen.dart';
+import 'package:iot/screens/qr_scanner_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:iot/providers/locale_provider.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
             routes: {
               '/': (context) => const AuthWrapper(),
               '/welcome': (context) => const WelcomeScreen(),
+              '/qr-scanner': (context) => const QRScannerScreen(),
             },
             localizationsDelegates: const [
               AppLocalizations.delegate,

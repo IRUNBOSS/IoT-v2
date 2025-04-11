@@ -112,5 +112,12 @@
     "deviceCodeMaxDigits": "You can enter up to 4 digits",
     
     "logout": "Logout",
-    "language": "Language"
+    "language": "Language",
+    "scanQR": "Scan QR",
+    "qrScanner": "QR Scanner",
+    "qrScanning": "QR Scanning",
+    "qrScanSuccess": "QR code scanned and device added successfully",
+    "qrScanError": "Error while scanning QR code",
+    "qrInvalidFormat": "Invalid QR code format",
+    "qrCameraPermission": "Camera permission required for QR scanning"
 }

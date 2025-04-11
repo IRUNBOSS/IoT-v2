@@ -112,5 +112,12 @@
     "deviceCodeMaxDigits": "En fazla 4 rakam girebilirsiniz",
     
     "logout": "Çıkış Yap",
-    "language": "Dil"
+    "language": "Dil",
+    "scanQR": "QR Tara",
+    "qrScanner": "QR Tarayıcı",
+    "qrScanning": "QR Tarama",
+    "qrScanSuccess": "QR kod başarıyla taranıp cihaz eklendi",
+    "qrScanError": "QR kod taranırken hata oluştu",
+    "qrInvalidFormat": "Geçersiz QR kod formatı",
+    "qrCameraPermission": "QR kod taramak için kamera izni gerekli"
 } 

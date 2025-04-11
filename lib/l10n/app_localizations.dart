@@ -560,6 +560,69 @@ class AppLocalizations {
     }
   }
 
+  String get scanQR {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'QR Tara';
+      default:
+        return 'Scan QR';
+    }
+  }
+
+  String get qrScanner {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'QR Tarayıcı';
+      default:
+        return 'QR Scanner';
+    }
+  }
+
+  String get qrScanning {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'QR Tarama';
+      default:
+        return 'QR Scanning';
+    }
+  }
+
+  String get qrScanSuccess {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'QR kod başarıyla taranıp cihaz eklendi';
+      default:
+        return 'QR code scanned and device added successfully';
+    }
+  }
+
+  String get qrScanError {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'QR kod taranırken hata oluştu';
+      default:
+        return 'Error while scanning QR code';
+    }
+  }
+
+  String get qrInvalidFormat {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'Geçersiz QR kod formatı';
+      default:
+        return 'Invalid QR code format';
+    }
+  }
+
+  String get qrCameraPermission {
+    switch (locale.languageCode) {
+      case 'tr':
+        return 'QR kod taramak için kamera izni gerekli';
+      default:
+        return 'Camera permission required for QR scanning';
+    }
+  }
+
   // Diğer çeviriler için de aynı yapıyı kullan
 }
 

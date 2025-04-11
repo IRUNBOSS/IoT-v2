@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iot/services/device_service.dart';
 import 'package:iot/screens/home_screen.dart';
+import 'package:iot/screens/qr_scanner_screen.dart';
 import 'package:iot/services/snackbar_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -236,7 +237,18 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                         borderSide:
                             BorderSide(color: blueColor.withOpacity(0.5)),
                       ),
-                      prefixIcon: Icon(Icons.qr_code, color: blueColor),
+                      prefixIcon: IconButton(
+                        icon: Icon(Icons.qr_code, color: blueColor),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const QRScannerScreen(),
+                            ),
+                          );
+                        },
+                        tooltip: localizations.scanQR,
+                      ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(color: blueColor, width: 2),
