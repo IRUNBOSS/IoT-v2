@@ -119,5 +119,6 @@
     "qrScanSuccess": "QR kod başarıyla taranıp cihaz eklendi",
     "qrScanError": "QR kod taranırken hata oluştu",
     "qrInvalidFormat": "Geçersiz QR kod formatı",
-    "qrCameraPermission": "QR kod taramak için kamera izni gerekli"
+    "qrCameraPermission": "QR kod taramak için kamera izni gerekli",
+    "qrProcessing": "QR kod işleniyor..."
 } 

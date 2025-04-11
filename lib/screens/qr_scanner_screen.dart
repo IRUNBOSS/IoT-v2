@@ -17,6 +17,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   final MobileScannerController cameraController = MobileScannerController();
   bool _isLoading = false;
   bool _isTorchOn = false;
+  bool _hasScanned = false;
 
   @override
   void dispose() {
@@ -32,6 +33,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
   Future<void> _handleScannedCode(String scannedCode) async {
+    if (_hasScanned) return;
+
+    setState(() {
+      _hasScanned = true;
+    });
+
     if (!_isValidDeviceCodeFormat(scannedCode)) {
       if (mounted) {
         SnackbarService.showSnackbar(
@@ -39,6 +46,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           message: AppLocalizations.of(context)!.qrInvalidFormat,
           isError: true,
         );
+        setState(() {
+          _hasScanned = false;
+        });
       }
       return;
     }
@@ -126,6 +136,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           message: AppLocalizations.of(context)!.qrScanError,
           isError: true,
         );
+        setState(() {
+          _hasScanned = false;
+        });
       }
     } finally {
       if (mounted) {
@@ -226,23 +239,45 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       ),
       body: Stack(
         children: [
-          MobileScanner(
-            controller: cameraController,
-            onDetect: (capture) {
-              final List<Barcode> barcodes = capture.barcodes;
-              for (final barcode in barcodes) {
-                if (barcode.rawValue != null) {
-                  _handleScannedCode(barcode.rawValue!);
-                  break;
+          if (!_hasScanned)
+            MobileScanner(
+              controller: cameraController,
+              onDetect: (capture) {
+                final List<Barcode> barcodes = capture.barcodes;
+                for (final barcode in barcodes) {
+                  if (barcode.rawValue != null) {
+                    _handleScannedCode(barcode.rawValue!);
+                    break;
+                  }
                 }
-              }
-            },
-          ),
+              },
+            ),
           if (_isLoading)
             Container(
               color: Colors.black.withOpacity(0.5),
               child: const Center(
                 child: CircularProgressIndicator(),
+              ),
+            ),
+          if (_hasScanned && !_isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 20),
+                    Text(
+                      AppLocalizations.of(context)!.qrProcessing,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
         ],

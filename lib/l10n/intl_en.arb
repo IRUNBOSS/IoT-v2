@@ -119,5 +119,6 @@
     "qrScanSuccess": "QR code scanned and device added successfully",
     "qrScanError": "Error while scanning QR code",
     "qrInvalidFormat": "Invalid QR code format",
-    "qrCameraPermission": "Camera permission required for QR scanning"
+    "qrCameraPermission": "Camera permission required for QR scanning",
+    "qrProcessing": "Processing QR code..."
 }
