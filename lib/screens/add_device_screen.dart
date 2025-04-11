@@ -44,7 +44,8 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         // Önce mama kabı ekle
         await _addSingleDevice(
           context: context,
-          deviceCode: deviceCode,
+          deviceCode:
+              'M${deviceCode.substring(2)}', // MS'den sonraki kısmı al ve başına M ekle
           deviceType: 'food_bowl',
           deviceName: AppLocalizations.of(context)!.smartFoodBowl,
         );
@@ -53,11 +54,11 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         if (context.mounted) {
           await _addSingleDevice(
             context: context,
-            deviceCode: deviceCode,
+            deviceCode:
+                'S${deviceCode.substring(2)}', // MS'den sonraki kısmı al ve başına S ekle
             deviceType: 'water_bowl',
             deviceName: AppLocalizations.of(context)!.smartWaterBowl,
-            showSuccessMessage:
-                true, // Sadece son cihaz eklendiğinde başarı mesajı göster
+            showSuccessMessage: true,
           );
         }
 
