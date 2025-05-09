@@ -142,29 +142,6 @@ class DeviceDetailScreen extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Mama Seviyesi Kartı
-            _buildDeviceCard(
-                context,
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSectionTitle(
-                        context, AppLocalizations.of(context)!.foodLevel),
-                    const SizedBox(height: 10),
-                    _buildProgressIndicator(
-                      context,
-                      foodBowlSettings['foodLevel'] /
-                          foodBowlSettings['maxCapacity'],
-                      AppLocalizations.of(context)!.currentFoodLevel(
-                        foodBowlSettings['foodLevel'].toString(),
-                        foodBowlSettings['maxCapacity'].toString(),
-                      ),
-                      foodBowlSettings['foodLevel'] == 0,
-                    ),
-                  ],
-                )),
-            const SizedBox(height: 10),
-
             // Porsiyon Miktarı Kartı
             _buildPortionSizeCard(
                 context, foodBowlSettings, deviceData['deviceId']),
@@ -229,8 +206,8 @@ class DeviceDetailScreen extends StatelessWidget {
                           }
                         },
                         icon: const Icon(Icons.pets),
-                        label: Text(AppLocalizations.of(context)!.feedNow(
-                            foodBowlSettings['portionSize'].toString())),
+                        label: Text(
+                            '${foodBowlSettings['portionSize']} saniye Mama Ver'),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           backgroundColor: Colors.blue,
@@ -246,11 +223,6 @@ class DeviceDetailScreen extends StatelessWidget {
 
             // Cihaz Durumu Kartı
             _buildDeviceStatusCard(context, updatedDeviceData),
-
-            // Işık Kontrolü Kartı
-            const SizedBox(height: 10),
-            _buildLightControlCard(
-                context, updatedDeviceData, deviceData['deviceId']),
           ],
         );
       },
@@ -279,26 +251,6 @@ class DeviceDetailScreen extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Su Seviyesi Kartı
-            _buildDeviceCard(
-                context,
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSectionTitle(
-                        context, AppLocalizations.of(context)!.waterLevel),
-                    const SizedBox(height: 10),
-                    _buildProgressIndicator(
-                      context,
-                      (waterBowlSettings['waterLevel'] ?? 0) /
-                          (waterBowlSettings['maxCapacity'] ?? 2000),
-                      '${waterBowlSettings['waterLevel'] ?? 0} / ${waterBowlSettings['maxCapacity'] ?? 2000} ml ${AppLocalizations.of(context)!.waterLevel.toLowerCase()}',
-                      (waterBowlSettings['waterLevel'] ?? 0) == 0,
-                    ),
-                  ],
-                )),
-            const SizedBox(height: 10),
-
             // Porsiyon Miktarı Kartı
             _buildWaterPortionSizeCard(
                 context, waterBowlSettings, deviceData['deviceId']),
@@ -368,9 +320,8 @@ class DeviceDetailScreen extends StatelessWidget {
                                 }
                               },
                         icon: const Icon(Icons.water_drop),
-                        label: Text(AppLocalizations.of(context)!
-                            .dispenseWaterNow(
-                                waterBowlSettings['portionSize'].toString())),
+                        label: Text(
+                            '${waterBowlSettings['portionSize']} saniye Su Ver'),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           backgroundColor: Colors.blue,
@@ -386,11 +337,6 @@ class DeviceDetailScreen extends StatelessWidget {
 
             // Cihaz Durumu Kartı
             _buildDeviceStatusCard(context, updatedDeviceData),
-
-            // Işık Kontrolü Kartı
-            const SizedBox(height: 10),
-            _buildLightControlCard(
-                context, updatedDeviceData, deviceData['deviceId']),
           ],
         );
       },
@@ -402,29 +348,33 @@ class DeviceDetailScreen extends StatelessWidget {
     String deviceId,
     Map<String, dynamic> currentSettings,
   ) async {
+    final maxCapacity = 600.0;
+    double sliderValue = (currentSettings['portionSize'] != null &&
+            currentSettings['portionSize'] >= 1 &&
+            currentSettings['portionSize'] <= 600)
+        ? currentSettings['portionSize'].toDouble()
+        : 5.0;
     final TextEditingController portionController = TextEditingController(
-      text: currentSettings['portionSize'].toString(),
+      text: sliderValue.toInt().toString(),
     );
-    double sliderValue = currentSettings['portionSize'].toDouble();
-    final maxCapacity = currentSettings['maxCapacity'].toDouble();
 
-    return showDialog(
+    await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
         title: Column(
           children: [
             Icon(
-              Icons.pets,
+              Icons.timer,
               size: 40,
               color: Colors.blue,
             ),
             const SizedBox(height: 10),
             Text(
-              AppLocalizations.of(context)!.foodPortionSize,
+              'Porsiyon Miktarı',
               style: TextStyle(
                 color: Theme.of(context).textTheme.bodyLarge?.color,
                 fontWeight: FontWeight.bold,
@@ -437,7 +387,7 @@ class DeviceDetailScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '${sliderValue.toInt()} gr',
+                '${sliderValue.toInt()} saniye',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -455,10 +405,10 @@ class DeviceDetailScreen extends StatelessWidget {
                 ),
                 child: Slider(
                   value: sliderValue,
-                  min: 10,
-                  max: maxCapacity,
-                  divisions: maxCapacity.toInt() - 10,
-                  label: '${sliderValue.toInt()} gr',
+                  min: 1,
+                  max: 600,
+                  divisions: 599,
+                  label: '${sliderValue.toInt()} saniye',
                   onChanged: (value) {
                     setState(() {
                       sliderValue = value;
@@ -485,14 +435,12 @@ class DeviceDetailScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(15),
                     borderSide: BorderSide.none,
                   ),
-                  suffixText: 'gr',
-                  hintText: AppLocalizations.of(context)!.portionSizeHint,
+                  suffixText: 'saniye',
+                  hintText: 'Saniye',
                 ),
                 onChanged: (value) {
                   final newValue = int.tryParse(value);
-                  if (newValue != null &&
-                      newValue >= 10 &&
-                      newValue <= maxCapacity) {
+                  if (newValue != null && newValue >= 1 && newValue <= 600) {
                     setState(() {
                       sliderValue = newValue.toDouble();
                     });
@@ -502,61 +450,82 @@ class DeviceDetailScreen extends StatelessWidget {
             ],
           ),
         ),
+        actionsPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              AppLocalizations.of(context)!.cancel,
-              style: TextStyle(
-                color: Theme.of(context).textTheme.bodyMedium?.color,
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  child: const Text('İptal'),
+                ),
               ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final newPortion = sliderValue.toInt();
-              if (newPortion >= 10 && newPortion <= maxCapacity) {
-                try {
-                  await DeviceService().updateFoodBowlSettings(
-                    deviceId: deviceId,
-                    settings: {
-                      ...currentSettings,
-                      'portionSize': newPortion,
-                    },
-                  );
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                    SnackbarService.showSnackbar(
-                      context,
-                      message: AppLocalizations.of(context)!.portionSizeUpdated,
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    SnackbarService.showSnackbar(
-                      context,
-                      message: AppLocalizations.of(context)!
-                          .errorUpdatingSettings(e.toString()),
-                      isError: true,
-                    );
-                  }
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final newPortionSize = int.tryParse(portionController.text);
+                    if (newPortionSize != null &&
+                        newPortionSize >= 1 &&
+                        newPortionSize <= 600) {
+                      try {
+                        if (currentSettings.containsKey('foodLevel')) {
+                          await DeviceService().updateFoodBowlSettings(
+                            deviceId: deviceId,
+                            settings: {
+                              ...currentSettings,
+                              'portionSize': newPortionSize,
+                            },
+                          );
+                        } else {
+                          await DeviceService().updateWaterBowlSettings(
+                            deviceId: deviceId,
+                            settings: {
+                              ...currentSettings,
+                              'portionSize': newPortionSize,
+                            },
+                          );
+                        }
+
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          SnackbarService.showSnackbar(
+                            context,
+                            message: 'Ayarlar güncellendi',
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          SnackbarService.showSnackbar(
+                            context,
+                            message: AppLocalizations.of(context)!
+                                .errorUpdatingSettings(e.toString()),
+                            isError: true,
+                          );
+                        }
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  child: const Text('Kaydet'),
+                ),
               ),
-            ),
-            child: Text(
-              AppLocalizations.of(context)!.save,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            ],
           ),
         ],
       ),
@@ -636,10 +605,14 @@ class DeviceDetailScreen extends StatelessWidget {
     Map<String, dynamic> currentSettings,
   ) async {
     final TextEditingController portionController = TextEditingController(
-      text: currentSettings['portionSize'].toString(),
+      text: (currentSettings['portionSize'] != null &&
+              currentSettings['portionSize'] >= 1 &&
+              currentSettings['portionSize'] <= 600)
+          ? currentSettings['portionSize'].toString()
+          : '5',
     );
-    double sliderValue = currentSettings['portionSize'].toDouble();
-    final maxCapacity = currentSettings['maxCapacity'].toDouble();
+    double sliderValue =
+        int.tryParse(portionController.text)?.toDouble() ?? 5.0;
 
     return showDialog(
       context: context,
@@ -657,7 +630,7 @@ class DeviceDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              AppLocalizations.of(context)!.waterPortionSize,
+              'Su Porsiyon Miktarı',
               style: TextStyle(
                 color: Theme.of(context).textTheme.bodyLarge?.color,
                 fontWeight: FontWeight.bold,
@@ -666,74 +639,84 @@ class DeviceDetailScreen extends StatelessWidget {
           ],
         ),
         content: StatefulBuilder(
-          builder: (context, setState) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${sliderValue.toInt()} ml',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
-                ),
-              ),
-              const SizedBox(height: 20),
-              SliderTheme(
-                data: SliderThemeData(
-                  activeTrackColor: Colors.blue,
-                  thumbColor: Colors.blue,
-                  overlayColor: Colors.blue.withOpacity(0.2),
-                  valueIndicatorColor: Colors.blue,
-                  valueIndicatorTextStyle: const TextStyle(color: Colors.white),
-                ),
-                child: Slider(
-                  value: sliderValue,
-                  min: 50,
-                  max: maxCapacity,
-                  divisions: ((maxCapacity - 50) / 50).round(),
-                  label: '${sliderValue.toInt()} ml',
-                  onChanged: (value) {
-                    setState(() {
-                      sliderValue = value;
-                      portionController.text = value.toInt().toString();
-                    });
-                  },
-                ),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: portionController,
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                  fontSize: 18,
-                ),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.grey[800]
-                      : Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
+          builder: (context, setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '${sliderValue.toInt()} saniye',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
                   ),
-                  suffixText: 'ml',
-                  hintText: AppLocalizations.of(context)!.waterAmountHint,
                 ),
-                onChanged: (value) {
-                  final newValue = int.tryParse(value);
-                  if (newValue != null &&
-                      newValue >= 50 &&
-                      newValue <= maxCapacity) {
-                    setState(() {
-                      sliderValue = newValue.toDouble();
-                    });
-                  }
-                },
-              ),
-            ],
-          ),
+                const SizedBox(height: 20),
+                SliderTheme(
+                  data: SliderThemeData(
+                    activeTrackColor: Colors.blue,
+                    thumbColor: Colors.blue,
+                    overlayColor: Colors.blue.withOpacity(0.2),
+                    valueIndicatorColor: Colors.blue,
+                    valueIndicatorTextStyle:
+                        const TextStyle(color: Colors.white),
+                  ),
+                  child: Slider(
+                    value: sliderValue,
+                    min: 1,
+                    max: 600,
+                    divisions: 599,
+                    label: '${sliderValue.toInt()} saniye',
+                    onChanged: (value) {
+                      setState(() {
+                        sliderValue = value;
+                        portionController.text = value.toInt().toString();
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: portionController,
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                          fontSize: 18,
+                        ),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.grey[800]
+                                  : Colors.grey[100],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide.none,
+                          ),
+                          suffixText: 'saniye',
+                          hintText: 'Saniye',
+                        ),
+                        onChanged: (value) {
+                          final newValue = int.tryParse(value);
+                          if (newValue != null &&
+                              newValue >= 1 &&
+                              newValue <= 600) {
+                            setState(() {
+                              sliderValue = newValue.toDouble();
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
         ),
         actions: [
           TextButton(
@@ -747,8 +730,8 @@ class DeviceDetailScreen extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              final newPortion = sliderValue.toInt();
-              if (newPortion >= 50 && newPortion <= maxCapacity) {
+              final newPortion = int.tryParse(portionController.text) ?? 5;
+              if (newPortion >= 1 && newPortion <= 600) {
                 try {
                   await DeviceService().updateWaterBowlSettings(
                     deviceId: deviceId,
@@ -803,7 +786,8 @@ class DeviceDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).cardColor,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor ??
+            Theme.of(context).scaffoldBackgroundColor,
         title: Text(
           deviceData['deviceName'],
           style: Theme.of(context).appBarTheme.titleTextStyle,
@@ -925,8 +909,10 @@ class DeviceDetailScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
         side: BorderSide(
-          color: Theme.of(context).dividerColor.withOpacity(0.1),
-          width: 1,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF232B3A)
+              : Colors.grey.shade300,
+          width: 1.2,
         ),
       ),
       child: Padding(
@@ -941,12 +927,10 @@ class DeviceDetailScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.grey[800]
-                    : Colors.grey[100],
+                color: Colors.blue.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).dividerColor.withOpacity(0.1),
+                  color: Colors.blue.withOpacity(0.08),
                   width: 1,
                 ),
               ),
@@ -955,13 +939,14 @@ class DeviceDetailScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: _getBatteryColor(deviceData['batteryLevel'])
-                          .withOpacity(0.2),
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF232B3A)
+                          : Colors.blue.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       _getBatteryIcon(deviceData['batteryLevel']),
-                      color: _getBatteryColor(deviceData['batteryLevel']),
+                      color: Colors.blue[700],
                       size: 24,
                     ),
                   ),
@@ -1010,12 +995,10 @@ class DeviceDetailScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.grey[800]
-                    : Colors.grey[100],
+                color: Colors.blue.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Colors.blue.withOpacity(0.3),
+                  color: Colors.blue.withOpacity(0.08),
                   width: 1,
                 ),
               ),
@@ -1024,7 +1007,9 @@ class DeviceDetailScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.2),
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF232B3A)
+                          : Colors.blue.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
@@ -1117,13 +1102,11 @@ class DeviceDetailScreen extends StatelessWidget {
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withOpacity(0.1)
-                        : Colors.black.withOpacity(0.1),
+                    color: Colors.blue.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: IconButton(
-                    icon: Icon(Icons.edit_outlined, color: Colors.blue),
+                    icon: Icon(Icons.edit_outlined, color: Colors.blue[700]),
                     onPressed: () => _showPortionEditDialog(
                       context,
                       deviceId,
@@ -1137,9 +1120,7 @@ class DeviceDetailScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.1),
+                color: Colors.blue.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -1148,13 +1129,13 @@ class DeviceDetailScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white.withOpacity(0.1)
-                          : Colors.black.withOpacity(0.1),
+                          ? const Color(0xFF232B3A)
+                          : Colors.blue.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       Icons.restaurant,
-                      color: Colors.blue,
+                      color: Colors.blue[700],
                       size: 24,
                     ),
                   ),
@@ -1163,18 +1144,22 @@ class DeviceDetailScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${foodBowlSettings['portionSize']} gr',
+                        '${foodBowlSettings['portionSize']} saniye',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.blue[200]
+                              : Colors.blue,
                         ),
                       ),
                       Text(
-                        AppLocalizations.of(context)!.perMeal,
+                        'Her besleme için',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.blue.withOpacity(0.7),
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.blue[100]
+                              : Colors.blue.withOpacity(0.7),
                         ),
                       ),
                     ],
@@ -1216,13 +1201,11 @@ class DeviceDetailScreen extends StatelessWidget {
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withOpacity(0.1)
-                        : Colors.black.withOpacity(0.1),
+                    color: Colors.blue.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: IconButton(
-                    icon: Icon(Icons.edit_outlined, color: Colors.blue),
+                    icon: Icon(Icons.edit_outlined, color: Colors.blue[700]),
                     onPressed: () => _showWaterPortionEditDialog(
                       context,
                       deviceId,
@@ -1236,9 +1219,7 @@ class DeviceDetailScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.1),
+                color: Colors.blue.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -1247,13 +1228,13 @@ class DeviceDetailScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white.withOpacity(0.1)
-                          : Colors.black.withOpacity(0.1),
+                          ? const Color(0xFF232B3A)
+                          : const Color(0xFFF3F8FE),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       Icons.water_drop,
-                      color: Colors.blue,
+                      color: Colors.blue[700],
                       size: 24,
                     ),
                   ),
@@ -1262,18 +1243,22 @@ class DeviceDetailScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${waterBowlSettings['portionSize']} ml',
+                        '${waterBowlSettings['portionSize']} saniye',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.blue[200]
+                              : Colors.blue,
                         ),
                       ),
                       Text(
-                        AppLocalizations.of(context)!.perWatering,
+                        'Her besleme için',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.blue.withOpacity(0.7),
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.blue[100]
+                              : Colors.blue.withOpacity(0.7),
                         ),
                       ),
                     ],
@@ -1281,186 +1266,6 @@ class DeviceDetailScreen extends StatelessWidget {
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLightControlCard(
-    BuildContext context,
-    Map<String, dynamic> deviceData,
-    String deviceId,
-  ) {
-    final Map<String, dynamic> lightSettings =
-        deviceData['lightSettings'] as Map<String, dynamic>? ??
-            {'isLightOpen': false, 'lightDuration': 30};
-
-    final TextEditingController durationController = TextEditingController(
-      text: lightSettings['lightDuration'].toString(),
-    );
-
-    return Card(
-      elevation: 2,
-      color: Theme.of(context).cardColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-        side: BorderSide(
-          color: Theme.of(context).dividerColor.withOpacity(0.1),
-          width: 1,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Işık Kontrolü',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                  ),
-                ),
-                Switch(
-                  value: lightSettings['isLightOpen'] ?? false,
-                  onChanged: (bool value) async {
-                    try {
-                      await DeviceService().updateLightSettings(
-                        deviceId: deviceId,
-                        isLightOpen: value,
-                        lightDuration: lightSettings['lightDuration'],
-                      );
-                    } catch (e) {
-                      if (context.mounted) {
-                        SnackbarService.showSnackbar(
-                          context,
-                          message:
-                              'Işık kontrolü güncellenirken hata oluştu: $e',
-                          isError: true,
-                        );
-                      }
-                    }
-                  },
-                  activeColor: Colors.blue,
-                  activeTrackColor: Colors.blue.withOpacity(0.4),
-                  inactiveThumbColor: Colors.grey[400],
-                  inactiveTrackColor: Colors.grey[300],
-                  materialTapTargetSize: MaterialTapTargetSize.padded,
-                  trackOutlineColor: WidgetStateProperty.resolveWith(
-                    (states) => Colors.grey[400],
-                  ),
-                  trackOutlineWidth: WidgetStateProperty.all(1.0),
-                  splashRadius: 24,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.blue.withOpacity(0.3),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.lightbulb,
-                      color: Colors.blue,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextFormField(
-                      controller: durationController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Işık Süresi (saniye)',
-                        labelStyle: TextStyle(
-                          color: Colors.blue,
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.blue),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.blue, width: 2),
-                        ),
-                      ),
-                      onChanged: (value) async {
-                        if (value.isNotEmpty) {
-                          try {
-                            final duration = int.parse(value);
-                            if (duration > 0) {
-                              await DeviceService().updateLightSettings(
-                                deviceId: deviceId,
-                                isLightOpen: lightSettings['isLightOpen'],
-                                lightDuration: duration,
-                              );
-                            }
-                          } catch (e) {
-                            if (context.mounted) {
-                              SnackbarService.showSnackbar(
-                                context,
-                                message: 'Süre güncellenirken hata oluştu: $e',
-                                isError: true,
-                              );
-                            }
-                          }
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (lightSettings['isLightOpen'] ?? false)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: CountdownTimer(
-                  duration: lightSettings['lightDuration'],
-                  onFinished: () async {
-                    try {
-                      await DeviceService().updateLightSettings(
-                        deviceId: deviceId,
-                        isLightOpen: false,
-                        lightDuration: lightSettings['lightDuration'],
-                      );
-                      if (context.mounted) {
-                        SnackbarService.showSnackbar(
-                          context,
-                          message: 'Işık otomatik olarak kapatıldı',
-                        );
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        SnackbarService.showSnackbar(
-                          context,
-                          message: 'Işık kapatılırken hata oluştu: $e',
-                          isError: true,
-                        );
-                      }
-                    }
-                  },
-                ),
-              ),
           ],
         ),
       ),
