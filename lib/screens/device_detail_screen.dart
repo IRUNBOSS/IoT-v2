@@ -161,22 +161,16 @@ class DeviceDetailScreen extends StatelessWidget {
                       child: ElevatedButton.icon(
                         onPressed: () async {
                           try {
-                            final currentFoodLevel =
-                                foodBowlSettings['foodLevel'] as int;
-                            final portionSize =
-                                foodBowlSettings['portionSize'] as int;
+                            final portionSize = foodBowlSettings['portionSize'];
+                            final newFoodLevel =
+                                foodBowlSettings['foodLevel'] - portionSize;
 
-                            if (currentFoodLevel < portionSize) {
-                              SnackbarService.showSnackbar(
-                                context,
-                                message:
-                                    AppLocalizations.of(context)!.notEnoughFood,
-                                isError: true,
-                              );
-                              return;
-                            }
-
-                            final newFoodLevel = currentFoodLevel - portionSize;
+                            // Işığı aç ve süreyi ayarla
+                            await DeviceService().updateLightSettings(
+                              deviceId: deviceData['deviceId'],
+                              isLightOpen: true,
+                              lightDuration: portionSize,
+                            );
 
                             await DeviceService().updateFoodBowlSettings(
                               deviceId: deviceData['deviceId'],
@@ -184,6 +178,7 @@ class DeviceDetailScreen extends StatelessWidget {
                                 ...foodBowlSettings,
                                 'foodLevel':
                                     newFoodLevel >= 0 ? newFoodLevel : 0,
+                                'portionSize': portionSize,
                               },
                             );
 
@@ -191,7 +186,7 @@ class DeviceDetailScreen extends StatelessWidget {
                               SnackbarService.showSnackbar(
                                 context,
                                 message: AppLocalizations.of(context)!
-                                    .foodDispensed(portionSize.toString()),
+                                    .foodPortionAmount(portionSize.toString()),
                               );
                             }
                           } catch (e) {
@@ -268,57 +263,48 @@ class DeviceDetailScreen extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: waterBowlSettings['waterLevel'] == 0
-                            ? null
-                            : () async {
-                                try {
-                                  final currentWaterLevel =
-                                      waterBowlSettings['waterLevel'] as int;
-                                  final portionSize =
-                                      waterBowlSettings['portionSize'] as int;
+                        onPressed: () async {
+                          try {
+                            final portionSize =
+                                waterBowlSettings['portionSize'];
+                            final newWaterLevel =
+                                waterBowlSettings['waterLevel'] - portionSize;
 
-                                  if (currentWaterLevel < portionSize) {
-                                    SnackbarService.showSnackbar(
-                                      context,
-                                      message: AppLocalizations.of(context)!
-                                          .notEnoughFood,
-                                      isError: true,
-                                    );
-                                    return;
-                                  }
+                            // Işığı aç ve süreyi ayarla
+                            await DeviceService().updateLightSettings(
+                              deviceId: deviceData['deviceId'],
+                              isLightOpen: true,
+                              lightDuration: portionSize,
+                            );
 
-                                  final newWaterLevel =
-                                      currentWaterLevel - portionSize;
-
-                                  await DeviceService().updateWaterBowlSettings(
-                                    deviceId: deviceData['deviceId'],
-                                    settings: {
-                                      ...waterBowlSettings,
-                                      'waterLevel': newWaterLevel >= 0
-                                          ? newWaterLevel
-                                          : 0,
-                                    },
-                                  );
-
-                                  if (context.mounted) {
-                                    SnackbarService.showSnackbar(
-                                      context,
-                                      message: AppLocalizations.of(context)!
-                                          .waterPortionAmount(
-                                              portionSize.toString()),
-                                    );
-                                  }
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    SnackbarService.showSnackbar(
-                                      context,
-                                      message: AppLocalizations.of(context)!
-                                          .errorUpdatingSettings(e.toString()),
-                                      isError: true,
-                                    );
-                                  }
-                                }
+                            await DeviceService().updateWaterBowlSettings(
+                              deviceId: deviceData['deviceId'],
+                              settings: {
+                                ...waterBowlSettings,
+                                'waterLevel':
+                                    newWaterLevel >= 0 ? newWaterLevel : 0,
+                                'portionSize': portionSize,
                               },
+                            );
+
+                            if (context.mounted) {
+                              SnackbarService.showSnackbar(
+                                context,
+                                message: AppLocalizations.of(context)!
+                                    .waterPortionAmount(portionSize.toString()),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              SnackbarService.showSnackbar(
+                                context,
+                                message: AppLocalizations.of(context)!
+                                    .errorUpdatingSettings(e.toString()),
+                                isError: true,
+                              );
+                            }
+                          }
+                        },
                         icon: const Icon(Icons.water_drop),
                         label: Text(
                             '${waterBowlSettings['portionSize']} saniye Su Ver'),

@@ -149,8 +149,13 @@ class DeviceService {
     if (userId == null) throw Exception('Kullanıcı oturum açmamış');
 
     try {
+      // Işık ayarlarını da güncelle
       await _firestore.collection('devices').doc(deviceId).update({
         'waterBowlSettings': settings,
+        'lightSettings': {
+          'isLightOpen': false,
+          'lightDuration': settings['portionSize'],
+        },
         'lastUpdated': FieldValue.serverTimestamp(),
       });
     } catch (e) {
@@ -183,8 +188,13 @@ class DeviceService {
     if (userId == null) throw Exception('Kullanıcı oturum açmamış');
 
     try {
+      // Işık ayarlarını da güncelle
       await _firestore.collection('devices').doc(deviceId).update({
         'foodBowlSettings': settings,
+        'lightSettings': {
+          'isLightOpen': false,
+          'lightDuration': settings['portionSize'],
+        },
         'lastUpdated': FieldValue.serverTimestamp(),
       });
     } catch (e) {
@@ -224,6 +234,7 @@ class DeviceService {
     required String deviceId,
     required bool isLightOpen,
     required int lightDuration,
+    int? portionSize,
   }) async {
     if (userId == null) throw Exception('Kullanıcı oturum açmamış');
 
@@ -235,7 +246,31 @@ class DeviceService {
         },
         'lastUpdated': FieldValue.serverTimestamp(),
       });
+
+      if (isLightOpen) {
+        int kalanSure = lightDuration;
+        while (kalanSure > 0) {
+          await Future.delayed(const Duration(seconds: 1));
+          kalanSure--;
+          await _firestore.collection('devices').doc(deviceId).update({
+            'lightSettings': {
+              'isLightOpen': true,
+              'lightDuration': kalanSure,
+            },
+            'lastUpdated': FieldValue.serverTimestamp(),
+          });
+        }
+        // Süre bittiğinde ışığı kapat
+        await _firestore.collection('devices').doc(deviceId).update({
+          'lightSettings': {
+            'isLightOpen': false,
+            'lightDuration': portionSize ?? lightDuration,
+          },
+          'lastUpdated': FieldValue.serverTimestamp(),
+        });
+      }
     } catch (e) {
+      _logger.severe('Işık ayarları güncellenirken hata: $e');
       throw Exception('Işık ayarları güncellenirken bir hata oluştu: $e');
     }
   }

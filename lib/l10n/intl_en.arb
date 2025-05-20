@@ -84,7 +84,7 @@
     "foodPortionSize": "Food Portion Size",
     "waterPortionSize": "Water Portion Size",
     "portionAmount": "{amount} gr",
-    "waterPortionAmount": "{amount} ml",
+    "waterPortionAmount": "{amount} seconds of water dispensed",
     "portionSizeHint": "Portion size",
     "waterAmountHint": "Water amount",
     "noFoodLeft": "No food left",
@@ -120,5 +120,6 @@
     "qrScanError": "Error while scanning QR code",
     "qrInvalidFormat": "Invalid QR code format",
     "qrCameraPermission": "Camera permission required for QR scanning",
-    "qrProcessing": "Processing QR code..."
+    "qrProcessing": "Processing QR code...",
+    "foodPortionAmount": "{amount} seconds of food dispensed"
 }
